@@ -3,7 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
-#include <cstring> // For memcpy
+#include <cstring> 
 
 // Local connections to your ZIP folders
 #include "dependente/glew/glew.h"
@@ -23,10 +23,9 @@ float playerRadius = 15.0f;
 float blockSize = 50.0f;
 float timeElapsed = 0.0f;
 
-// Enemy structure
+// Enemy structure (Supports multi-point complex paths)
 struct Spider {
-    glm::vec2 startPos;
-    glm::vec2 endPos;
+    std::vector<glm::vec2> waypoints;
     float speed;
 };
 
@@ -36,97 +35,64 @@ float spiderRadius = 18.0f;
 // The active maze map (1 = wall, 0 = path)
 int maze[12][16];
 
-// Function to load the map and enemies based on the current level
+// Function to load the map and enemies based on the current level (Strictly 2 Levels)
 void StartLevel(int level) {
     playerPos = glm::vec2(75.0f, 25.0f); // Reset player position
     timeElapsed = 0.0f;                  // Reset time for animation sync
     isGameOver = false;                  // Remove Game Over state
 
-    // Calculate speed boost (enemies get faster each level)
-    float speedBoost = (level - 1) * 1.0f;
-
     if (level == 1) {
-        // LEVEL 1 MAP (Basic)
+        // LEVEL 1 MAP (Basic Training)
         int map1[12][16] = {
             { 1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }, // Row 0 (Bottom) - ENTRANCE
-            { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1 }, // Row 1
-            { 1,0,1,0,1,0,1,1,1,0,1,0,1,1,0,1 }, // Row 2
-            { 1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,1 }, // Row 3
-            { 1,0,1,1,1,1,1,0,1,1,1,0,1,0,1,1 }, // Row 4
-            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }, // Row 5 
-            { 1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1 }, // Row 6
-            { 1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1 }, // Row 7
-            { 1,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1 }, // Row 8
-            { 1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1 }, // Row 9
-            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 }, // Row 10
-            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 }  // Row 11 (Top) - EXIT
+            { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1 },
+            { 1,0,1,0,1,0,1,1,1,0,1,0,1,1,0,1 },
+            { 1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,1 },
+            { 1,0,1,1,1,1,1,0,1,1,1,0,1,0,1,1 },
+            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+            { 1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1 },
+            { 1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1 },
+            { 1,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1 },
+            { 1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1 },
+            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 },
+            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 }  // Row 11 (Top) - EXIT at X=14
         };
         std::memcpy(maze, map1, sizeof(maze));
 
         // Spiders for Level 1
         spiders = {
-            { glm::vec2(175.0f, 175.0f), glm::vec2(375.0f, 175.0f), 2.5f },
-            { glm::vec2(375.0f, 275.0f), glm::vec2(725.0f, 275.0f), 3.0f },
-            { glm::vec2(75.0f, 475.0f),  glm::vec2(325.0f, 475.0f), 2.0f }
-        };
-
-    }
-    else if (level == 2) {
-        // LEVEL 2 MAP (Tighter corridors, more dead ends)
-        int map2[12][16] = {
-            { 1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
-            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
-            { 1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1 },
-            { 1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1 },
-            { 1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1 },
-            { 1,0,1,0,1,0,0,0,0,0,0,1,0,1,0,1 },
-            { 1,0,1,0,1,0,1,1,1,1,0,1,0,1,0,1 },
-            { 1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1 },
-            { 1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1 },
-            { 1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1 },
-            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 },
-            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 }
-        };
-        std::memcpy(maze, map2, sizeof(maze));
-
-        // Spiders for Level 2 (Adapted to the new map layout)
-        spiders = {
-            { glm::vec2(175.0f, 175.0f), glm::vec2(625.0f, 175.0f), 2.0f }, // Guards lower corridor
-            { glm::vec2(75.0f, 475.0f),  glm::vec2(175.0f, 475.0f), 3.5f }, // Guards top-left corner
-            { glm::vec2(275.0f, 475.0f), glm::vec2(425.0f, 475.0f), 2.5f }  // Guards middle exit path
+            { { glm::vec2(175.0f, 175.0f), glm::vec2(375.0f, 175.0f) }, 1.5f },
+            { { glm::vec2(375.0f, 275.0f), glm::vec2(725.0f, 275.0f) }, 1.8f },
+            { { glm::vec2(75.0f, 475.0f),  glm::vec2(325.0f, 475.0f) }, 1.2f }
         };
 
     }
     else {
-        // LEVEL 3+ MAP (Maximum difficulty, zig-zag spiral)
-        int map3[12][16] = {
-            { 1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
-            { 1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1 },
-            { 1,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1 },
-            { 1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,1 },
-            { 1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1 },
-            { 1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,1 },
-            { 1,0,1,0,1,0,1,0,1,1,0,1,0,1,0,1 },
-            { 1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1 },
-            { 1,0,1,0,1,0,1,1,1,1,0,1,0,1,0,1 },
-            { 1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1 },
-            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 },
-            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 }
+        // LEVEL 2 MAP (The Zig-Zag with Hiding Spots)
+        int map2[12][16] = {
+            { 1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }, // Entrance
+            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }, // Row 1
+            { 1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1 }, // Wall with gap at Right AND Hiding Spot at Index 7
+            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }, // Row 3
+            { 1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1 }, // Wall with gap at Left AND Hiding Spot at Index 9
+            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }, // Row 5
+            { 1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1 }, // Wall with gap at Right AND Hiding Spot at Index 5
+            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }, // Row 7
+            { 1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1 }, // Wall with gap at Left AND Hiding Spot at Index 9
+            { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }, // Row 9
+            { 1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1 }, // Wall with Hiding Spot at Index 7
+            { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 }  // Exit at X=14
         };
-        std::memcpy(maze, map3, sizeof(maze));
+        std::memcpy(maze, map2, sizeof(maze));
 
-        // Spiders for Level 3 (4 spiders now!)
+        // Spiders for Level 2 (Constant speed, fair timing)
         spiders = {
-            { glm::vec2(175.0f, 75.0f),  glm::vec2(725.0f, 75.0f),  2.0f }, // Guards Row 1
-            { glm::vec2(275.0f, 175.0f), glm::vec2(625.0f, 175.0f), 2.5f }, // Guards Row 3
-            { glm::vec2(275.0f, 475.0f), glm::vec2(525.0f, 475.0f), 3.0f }, // Guards inner Row 9
-            { glm::vec2(75.0f, 475.0f),  glm::vec2(175.0f, 475.0f), 4.0f }  // Fast guard on outer Row 9
+            { { glm::vec2(175.0f, 75.0f),  glm::vec2(725.0f, 75.0f) }, 1.6f },
+            { { glm::vec2(625.0f, 175.0f), glm::vec2(75.0f, 175.0f) }, 1.7f },
+            { { glm::vec2(175.0f, 275.0f), glm::vec2(725.0f, 275.0f) }, 1.8f },
+            { { glm::vec2(625.0f, 375.0f), glm::vec2(75.0f, 375.0f) }, 1.7f },
+            { { glm::vec2(175.0f, 475.0f), glm::vec2(725.0f, 475.0f) }, 1.9f }
         };
-    }
-
-    // Apply the speed boost for all levels
-    for (size_t i = 0; i < spiders.size(); i++) {
-        spiders[i].speed += speedBoost;
     }
 
     printf("\n========================================\n");
@@ -180,13 +146,15 @@ void CreateCircle() {
     glEnableVertexAttribArray(0);
 }
 
-// --- MATH & COLLISIONS ---
+// --- MATH & COLLISIONS (Optimized with corner tolerance) ---
 bool CheckCollision(glm::vec2 circleCenter, float radius, glm::vec2 aabbMin, glm::vec2 aabbMax) {
     float closestX = std::max(aabbMin.x, std::min(circleCenter.x, aabbMax.x));
     float closestY = std::max(aabbMin.y, std::min(circleCenter.y, aabbMax.y));
     float distanceX = circleCenter.x - closestX;
     float distanceY = circleCenter.y - closestY;
-    return (distanceX * distanceX + distanceY * distanceY) < (radius * radius);
+
+    // Slight tolerance (0.92f) at corners to prevent snapping/getting stuck
+    return (distanceX * distanceX + distanceY * distanceY) < ((radius * 0.92f) * (radius * 0.92f));
 }
 
 bool CheckCircleCollision(glm::vec2 centerA, float radiusA, glm::vec2 centerB, float radiusB) {
@@ -204,7 +172,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "2D Vent Maze - Part 1", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "2D Vent Maze", NULL, NULL);
     if (!window) { glfwTerminate(); return -1; }
     glfwMakeContextCurrent(window);
     glewExperimental = true;
@@ -221,8 +189,9 @@ int main() {
 
     float lastTime = glfwGetTime();
 
-    // Initialize Level 1 when the game starts
     StartLevel(currentLevel);
+
+    bool nKeyWasPressed = false; // Used for the debounce of the Skip button
 
     // --- GAME LOOP ---
     while (!glfwWindowShouldClose(window)) {
@@ -230,61 +199,105 @@ int main() {
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        // Game logic runs only if NOT dead
         if (!isGameOver) {
-            timeElapsed += deltaTime; // Time flows (moves enemies)
+            timeElapsed += deltaTime;
+            float speed = 200.0f * deltaTime; // Player speed
 
-            // 1. INPUT & WALL COLLISIONS
-            float speed = 200.0f * deltaTime;
-            glm::vec2 nextPos = playerPos;
-            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) nextPos.y += speed;
-            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) nextPos.y -= speed;
-            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) nextPos.x -= speed;
-            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) nextPos.x += speed;
+            // --- SKIP BUTTON (DEBUG) ---
+            bool nKeyIsPressed = (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS);
+            if (nKeyIsPressed && !nKeyWasPressed) {
+                if (currentLevel < 2) {
+                    currentLevel++;
+                    printf("\n--- LEVEL SKIPPED (DEBUG) ---\n");
+                    StartLevel(currentLevel);
+                }
+                else {
+                    printf("\n========================================\n");
+                    printf(" YOU WON THE GAME! (SKIPPED TO VICTORY)\n");
+                    printf(" Press 'R' to play again from Level 1.\n");
+                    printf("========================================\n");
+                    isGameOver = true; // Trigger win screen state
+                }
+            }
+            nKeyWasPressed = nKeyIsPressed;
 
-            bool collision = false;
+            // --- X-AXIS MOVEMENT ---
+            glm::vec2 nextPosX = playerPos;
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) nextPosX.x -= speed;
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) nextPosX.x += speed;
+
+            bool collisionX = false;
             for (int i = 0; i < 12; i++) {
                 for (int j = 0; j < 16; j++) {
                     if (maze[i][j] == 1) {
                         glm::vec2 boxMin(j * blockSize, i * blockSize);
                         glm::vec2 boxMax((j + 1) * blockSize, (i + 1) * blockSize);
-                        if (CheckCollision(nextPos, playerRadius, boxMin, boxMax)) {
-                            collision = true;
+                        if (CheckCollision(nextPosX, playerRadius, boxMin, boxMax)) {
+                            collisionX = true;
                         }
                     }
                 }
             }
-            if (!collision) playerPos = nextPos;
+            if (!collisionX) playerPos.x = nextPosX.x;
 
-            // CHECK EXIT (PROGRESS TO NEXT LEVEL)
+            // --- Y-AXIS MOVEMENT ---
+            glm::vec2 nextPosY = playerPos;
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) nextPosY.y += speed;
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) nextPosY.y -= speed;
+
+            bool collisionY = false;
+            for (int i = 0; i < 12; i++) {
+                for (int j = 0; j < 16; j++) {
+                    if (maze[i][j] == 1) {
+                        glm::vec2 boxMin(j * blockSize, i * blockSize);
+                        glm::vec2 boxMax((j + 1) * blockSize, (i + 1) * blockSize);
+                        if (CheckCollision(nextPosY, playerRadius, boxMin, boxMax)) {
+                            collisionY = true;
+                        }
+                    }
+                }
+            }
+            if (!collisionY) playerPos.y = nextPosY.y;
+
+            // CHECK EXIT (PROGRESS)
             if (playerPos.y > 580.0f) {
-                currentLevel++; // Increase level
-                printf("\n========================================\n");
-                printf(" YOU ESCAPED! PROCEEDING TO LEVEL %d...\n", currentLevel);
-                printf("========================================\n");
-                StartLevel(currentLevel); // Reload map automatically
+                if (currentLevel < 2) {
+                    currentLevel++;
+                    printf("\n========================================\n");
+                    printf(" YOU ESCAPED LEVEL 1! PROCEEDING TO LEVEL 2...\n");
+                    printf("========================================\n");
+                    StartLevel(currentLevel);
+                }
+                else {
+                    printf("\n========================================\n");
+                    printf(" CONGRATULATIONS! YOU WON THE ENTIRE GAME!\n");
+                    printf(" You successfully escaped the vent maze!\n");
+                    printf(" Press 'R' to play again from Level 1.\n");
+                    printf("========================================\n");
+                    isGameOver = true; // Triggers the end/win state
+                }
             }
         }
         else {
-            // Game is frozen (Game Over). Waiting for Restart
+            // GAME OVER / WIN SCREEN - WAIT FOR 'R' TO RESTART
             if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-                currentLevel = 1; // Return to Level 1
+                currentLevel = 1;
                 StartLevel(currentLevel);
                 printf("Game reset to Level 1. Good luck!\n");
             }
         }
 
-        // 2. RENDERING & WINDOW SCALING SETTINGS
+        // 2. RENDERING & SCALING
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
 
-        // Red background if dead, Grey if playing
         if (isGameOver) {
-            glClearColor(0.4f, 0.0f, 0.0f, 1.0f);
+            // Dacă a terminat jocul sau a murit, afișăm ecranul special (Poți personaliza culoarea)
+            glClearColor(0.2f, 0.0f, 0.4f, 1.0f); // Violet închis pentru VICTORIE/FINAL
         }
         else {
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Gri pentru joc normal
         }
 
         glClear(GL_COLOR_BUFFER_BIT);
@@ -310,39 +323,45 @@ int main() {
         glUniform3f(ColorID, 0.2f, 0.2f, 0.2f); // Dark grey body
         glm::mat4 playerBase = glm::translate(glm::mat4(1.0f), glm::vec3(playerPos.x, playerPos.y, 0.0f));
 
-        // Head
         glm::mat4 headMVP = Projection * glm::scale(playerBase, glm::vec3(playerRadius, playerRadius, 1.0f));
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &headMVP[0][0]);
         glDrawArrays(GL_TRIANGLE_FAN, 0, circleVertexCount);
 
-        // Left Ear
         glm::mat4 leftEar = glm::translate(playerBase, glm::vec3(-10.0f, 10.0f, 0.0f));
         glm::mat4 leftEarMVP = Projection * glm::scale(leftEar, glm::vec3(8.0f, 8.0f, 1.0f));
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &leftEarMVP[0][0]);
         glDrawArrays(GL_TRIANGLE_FAN, 0, circleVertexCount);
 
-        // Right Ear
         glm::mat4 rightEar = glm::translate(playerBase, glm::vec3(10.0f, 10.0f, 0.0f));
         glm::mat4 rightEarMVP = Projection * glm::scale(rightEar, glm::vec3(8.0f, 8.0f, 1.0f));
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &rightEarMVP[0][0]);
         glDrawArrays(GL_TRIANGLE_FAN, 0, circleVertexCount);
 
-        // --- DRAW SPIDERS & DEATH COLLISION ---
+        // --- DRAW SPIDERS & PATROL LOGIC ---
         glUniform3f(ColorID, 0.8f, 0.1f, 0.1f); // Red body
 
         for (size_t s = 0; s < spiders.size(); s++) {
 
-            float t = (sinf(timeElapsed * spiders[s].speed) + 1.0f) / 2.0f;
-            glm::vec2 currentSpiderPos = spiders[s].startPos + t * (spiders[s].endPos - spiders[s].startPos);
+            int numPoints = spiders[s].waypoints.size();
+            float t = timeElapsed * spiders[s].speed;
 
-            // DEATH LOGIC: Check collision only if game is active
+            float cycle = fmod(t, (float)numPoints);
+            int currentIndex = (int)cycle;
+            int nextIndex = (currentIndex + 1) % numPoints;
+            float fraction = cycle - currentIndex;
+
+            glm::vec2 p1 = spiders[s].waypoints[currentIndex];
+            glm::vec2 p2 = spiders[s].waypoints[nextIndex];
+            glm::vec2 currentSpiderPos = p1 + fraction * (p2 - p1);
+
+            // DEATH LOGIC
             if (!isGameOver) {
                 if (CheckCircleCollision(playerPos, playerRadius, currentSpiderPos, spiderRadius)) {
                     printf("\n========================================\n");
                     printf(" YOU WERE EATEN BY A SPIDER! GAME OVER.\n");
                     printf(" Press 'R' to restart from Level 1.\n");
                     printf("========================================\n");
-                    isGameOver = true; // Trigger Game Over state
+                    isGameOver = true;
                 }
             }
 
@@ -353,12 +372,11 @@ int main() {
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &spiderMVP[0][0]);
             glDrawArrays(GL_TRIANGLE_FAN, 0, circleVertexCount);
 
-            // Draw Legs (Animation)
+            // Draw Legs
             glBindVertexArray(squareVAO);
             float legAngle = sinf(timeElapsed * 15.0f) * 0.5f;
 
             for (int i = 0; i < 4; i++) {
-                // Right Legs
                 glm::mat4 legR = glm::translate(spiderBase, glm::vec3(10.0f, 10.0f - (i * 6.0f), 0.0f));
                 legR = glm::rotate(legR, (i % 2 == 0) ? legAngle : -legAngle, glm::vec3(0, 0, 1));
                 legR = glm::translate(legR, glm::vec3(0.0f, -2.0f, 0.0f));
@@ -366,7 +384,6 @@ int main() {
                 glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &legRMVP[0][0]);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
 
-                // Left Legs
                 glm::mat4 legL = glm::translate(spiderBase, glm::vec3(-10.0f, 10.0f - (i * 6.0f), 0.0f));
                 legL = glm::rotate(legL, (i % 2 == 0) ? -legAngle : legAngle, glm::vec3(0, 0, 1));
                 legL = glm::translate(legL, glm::vec3(-25.0f, -2.0f, 0.0f));
