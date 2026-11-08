@@ -87,11 +87,11 @@ void StartLevel(int level) {
 
         // Spiders for Level 2 (Constant speed, fair timing)
         spiders = {
-            { { glm::vec2(175.0f, 75.0f),  glm::vec2(725.0f, 75.0f) }, 1.6f },
-            { { glm::vec2(625.0f, 175.0f), glm::vec2(75.0f, 175.0f) }, 1.7f },
-            { { glm::vec2(175.0f, 275.0f), glm::vec2(725.0f, 275.0f) }, 1.8f },
-            { { glm::vec2(625.0f, 375.0f), glm::vec2(75.0f, 375.0f) }, 1.7f },
-            { { glm::vec2(175.0f, 475.0f), glm::vec2(725.0f, 475.0f) }, 1.9f }
+            { { glm::vec2(175.0f, 75.0f),  glm::vec2(725.0f, 75.0f) }, 1.0f },
+            { { glm::vec2(625.0f, 175.0f), glm::vec2(75.0f, 175.0f) }, 1.0f },
+            { { glm::vec2(175.0f, 275.0f), glm::vec2(725.0f, 275.0f) }, 1.0f },
+            { { glm::vec2(625.0f, 375.0f), glm::vec2(75.0f, 375.0f) }, 1.0f },
+            { { glm::vec2(175.0f, 475.0f), glm::vec2(725.0f, 475.0f) }, 1.0f }
         };
     }
 
@@ -201,7 +201,7 @@ int main() {
 
         if (!isGameOver) {
             timeElapsed += deltaTime;
-            float speed = 200.0f * deltaTime; // Player speed
+            float speed = 350.0f * deltaTime; // Player speed
 
             // --- SKIP BUTTON (DEBUG) ---
             bool nKeyIsPressed = (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS);
