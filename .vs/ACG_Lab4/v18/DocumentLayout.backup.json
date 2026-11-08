@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\ACG\\Lab4_OpenGL\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E8D7D48F-7AB1-4260-BCEC-8CC11D9FBC01}|lab_TGIP_1.vcxproj|C:\\ACG\\Lab4_OpenGL\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{E8D7D48F-7AB1-4260-BCEC-8CC11D9FBC01}|lab_TGIP_1.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8D7D48F-7AB1-4260-BCEC-8CC11D9FBC01}|lab_TGIP_1.vcxproj|C:\\ACG\\Lab4_OpenGL\\SimpleFragmentShader.fragmentshader||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{E8D7D48F-7AB1-4260-BCEC-8CC11D9FBC01}|lab_TGIP_1.vcxproj|solutionrelative:SimpleFragmentShader.fragmentshader||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8D7D48F-7AB1-4260-BCEC-8CC11D9FBC01}|lab_TGIP_1.vcxproj|C:\\ACG\\Lab4_OpenGL\\SimpleVertexShader.vertexshader||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{E8D7D48F-7AB1-4260-BCEC-8CC11D9FBC01}|lab_TGIP_1.vcxproj|solutionrelative:SimpleVertexShader.vertexshader||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\ACG\\Lab4_OpenGL\\main.cpp",
+              "RelativeDocumentMoniker": "main.cpp",
+              "ToolTip": "C:\\ACG\\Lab4_OpenGL\\main.cpp",
+              "RelativeToolTip": "main.cpp",
+              "ViewState": "AgIAAGUBAAAAAAAAAAAwwIABAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-11-08T21:29:18.825Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "SimpleVertexShader.vertexshader",
+              "DocumentMoniker": "C:\\ACG\\Lab4_OpenGL\\SimpleVertexShader.vertexshader",
+              "RelativeDocumentMoniker": "SimpleVertexShader.vertexshader",
+              "ToolTip": "C:\\ACG\\Lab4_OpenGL\\SimpleVertexShader.vertexshader",
+              "RelativeToolTip": "SimpleVertexShader.vertexshader",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-11-08T21:29:32.668Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "SimpleFragmentShader.fragmentshader",
+              "DocumentMoniker": "C:\\ACG\\Lab4_OpenGL\\SimpleFragmentShader.fragmentshader",
+              "RelativeDocumentMoniker": "SimpleFragmentShader.fragmentshader",
+              "ToolTip": "C:\\ACG\\Lab4_OpenGL\\SimpleFragmentShader.fragmentshader",
+              "RelativeToolTip": "SimpleFragmentShader.fragmentshader",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-11-08T21:29:31.092Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+﻿          1 file(s) copied.
+          1 file(s) copied.
+  main.cpp
+C:\ACG\Lab4_OpenGL\main.cpp(222,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\ACG\Lab4_OpenGL\main.cpp(229,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  lab_TGIP_1.vcxproj -> C:\ACG\Lab4_OpenGL\Debug\ACG_Lab4.exe
