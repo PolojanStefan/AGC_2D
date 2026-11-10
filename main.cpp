@@ -179,8 +179,6 @@ int main() {
     playerHealth = maxHealth;
     StartLevel(currentLevel);
 
-    bool nKeyWasPressed = false;
-
     while (!glfwWindowShouldClose(window)) {
         float currentTime = glfwGetTime();
         float deltaTime = currentTime - lastTime;
@@ -194,19 +192,6 @@ int main() {
                 invulnerabilityTimer -= deltaTime;
                 if (invulnerabilityTimer < 0.0f) invulnerabilityTimer = 0.0f;
             }
-
-            bool nKeyIsPressed = (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS);
-            if (nKeyIsPressed && !nKeyWasPressed) {
-                if (currentLevel < 2) {
-                    currentLevel++;
-                    StartLevel(currentLevel);
-                }
-                else {
-                    printf("YOU WON\n");
-                    isGameOver = true;
-                }
-            }
-            nKeyWasPressed = nKeyIsPressed;
 
             glm::vec2 nextPosX = playerPos;
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) nextPosX.x -= speed;
