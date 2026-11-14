@@ -1,6 +1,6 @@
 ![The Great Getaway Poster](pozajoc.png)
 # The Great Getaway: Mickey’s Syndicate - The Toontown Trap
-# A project made by Polojan Stefan-Alexandru, Borca Razvan-Andrei, Marin Iona-Alexaia
+### A project made by Polojan Stefan-Alexandru, Borca Razvan-Andrei, Marin Iona-Alexaia
 ## 📖 Story & Game Structure
 
 ### Act 1: The Setup
