@@ -73,7 +73,7 @@ void StartLevel(int level) {
         };
     }
     else {
-        // Level 2 Map with hiding spots
+        // Level 2 Map 
         int map2[12][16] = {
             { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
             { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
@@ -166,7 +166,6 @@ bool CheckCollision(glm::vec2 circleCenter, float radius, glm::vec2 aabbMin, glm
 bool CheckCircleCollision(glm::vec2 centerA, float radiusA, glm::vec2 centerB, float radiusB) {
     float dx = centerA.x - centerB.x;
     float dy = centerA.y - centerB.y;
-    // Compare squared distance to avoid expensive square root calculation
     float distanceSquared = (dx * dx) + (dy * dy);
     float radiusSum = radiusA + radiusB;
     return distanceSquared < (radiusSum * radiusSum);
@@ -190,7 +189,7 @@ int main() {
     CreateSquare();
     CreateCircle();
 
-    // Set up 2D orthographic camera matching the 800x600 window coordinates
+    // Set up 2D camera 
     glm::mat4 Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, -1.0f, 1.0f);
     GLuint MatrixID = glGetUniformLocation(programID, "MVP");
     GLuint ColorID = glGetUniformLocation(programID, "objectColor");
@@ -202,7 +201,7 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
 
-        // Calculate frame time delta so movement speed stays independent of FPS
+        // Calculate frame time delta 
         float currentTime = glfwGetTime();
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
@@ -307,7 +306,7 @@ int main() {
             }
         }
 
-        // Calculate oscillating wobble angle while player is moving
+        // Calculate wobble angle while player is moving
         float wobbleAngle = 0.0f;
         if (!isGameOver && (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS ||
             glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)) {
@@ -374,7 +373,7 @@ int main() {
                 }
             }
 
-            // Draw spider body at interpolated waypoint position
+            // Draw spider body at waypoint position
             glBindVertexArray(circleVAO);
             glUniform3f(ColorID, 0.8f, 0.1f, 0.1f);
             glm::mat4 spiderBase = glm::translate(glm::mat4(1.0f), glm::vec3(currentSpiderPos.x, currentSpiderPos.y, 0.0f));
@@ -382,7 +381,7 @@ int main() {
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &spiderMVP[0][0]);
             glDrawArrays(GL_TRIANGLE_FAN, 0, circleVertexCount);
 
-            // Rotate core around its own center while following spiderBase
+            // Rotate the square around  center while following spiderBase
             glBindVertexArray(squareVAO);
             glUniform3f(ColorID, 1.0f, 0.8f, 0.0f);
 
