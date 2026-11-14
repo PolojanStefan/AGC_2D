@@ -13,6 +13,7 @@
 
 #include "shader.hpp"
 
+// Game state and player configuration
 bool isGameOver = false;
 int currentLevel = 1;
 
@@ -21,11 +22,13 @@ float playerRadius = 15.0f;
 float blockSize = 50.0f;
 float timeElapsed = 0.0f;
 
+// Health and i-frames (invulnerability frames) system
 int maxHealth = 2;
 int playerHealth = 2;
 float invulnerabilityTimer = 0.0f;
 const float INVULNERABILITY_DURATION = 1.0f;
 
+// Spider enemies patrol between multiple waypoints
 struct Spider {
     std::vector<glm::vec2> waypoints;
     float speed;
@@ -36,13 +39,16 @@ float spiderRadius = 18.0f;
 
 int maze[12][16];
 
+// Initializes player position, timers, map layout, and enemy patrol routes for the level
 void StartLevel(int level) {
+    // Reset player to starting tile and clear round timers
     playerPos = glm::vec2(75.0f, 75.0f);
     timeElapsed = 0.0f;
     isGameOver = false;
     invulnerabilityTimer = 0.0f;
 
     if (level == 1) {
+        // Level 1 Map (1 = Wall, 0 = Walkable Path)
         int map1[12][16] = {
             { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
             { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1 },
@@ -57,6 +63,7 @@ void StartLevel(int level) {
             { 1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1 },
             { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1 }
         };
+        // Copy active level grid into the global maze array
         std::memcpy(maze, map1, sizeof(maze));
 
         spiders = {
@@ -66,6 +73,7 @@ void StartLevel(int level) {
         };
     }
     else {
+        // Level 2 Map with hiding spots
         int map2[12][16] = {
             { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
             { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
@@ -95,6 +103,7 @@ void StartLevel(int level) {
 GLuint squareVAO, circleVAO;
 int circleVertexCount = 0;
 
+// Builds a unit square mesh using two triangles and uploads it to the GPU
 void CreateSquare() {
     float vertices[] = {
         0.0f, 0.0f, 0.0f,
@@ -105,6 +114,8 @@ void CreateSquare() {
         0.0f, 0.0f, 0.0f
     };
     GLuint VBO;
+
+    // Generate VAO and VBO, then send vertex coordinates to GPU memory
     glGenVertexArrays(1, &squareVAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(squareVAO);
@@ -114,10 +125,13 @@ void CreateSquare() {
     glEnableVertexAttribArray(0);
 }
 
+// Approximates a unit circle using a 36-segment triangle fan on the GPU
 void CreateCircle() {
     std::vector<float> vertices;
     int segments = 36;
+    // Start with the center point for GL_TRIANGLE_FAN
     vertices.push_back(0.0f); vertices.push_back(0.0f); vertices.push_back(0.0f);
+    // Calculate perimeter points around 360 degrees using sine and cosine
     for (int i = 0; i <= segments; i++) {
         float angle = i * 2.0f * 3.14159f / segments;
         vertices.push_back(cos(angle));
@@ -136,23 +150,29 @@ void CreateCircle() {
     glEnableVertexAttribArray(0);
 }
 
+// Detects overlap between a circle (player) and an axis-aligned rectangle (wall tile)
 bool CheckCollision(glm::vec2 circleCenter, float radius, glm::vec2 aabbMin, glm::vec2 aabbMax) {
+    // Clamp circle center to box bounds to find closest point on the wall
     float closestX = std::max(aabbMin.x, std::min(circleCenter.x, aabbMax.x));
     float closestY = std::max(aabbMin.y, std::min(circleCenter.y, aabbMax.y));
     float distanceX = circleCenter.x - closestX;
     float distanceY = circleCenter.y - closestY;
 
+    // Compare squared distance against slightly shrunk radius to avoid snagging on corners
     return (distanceX * distanceX + distanceY * distanceY) < ((radius * 0.92f) * (radius * 0.92f));
 }
 
+// Checks if two circles (player and spider) intersect using squared distance
 bool CheckCircleCollision(glm::vec2 centerA, float radiusA, glm::vec2 centerB, float radiusB) {
     float dx = centerA.x - centerB.x;
     float dy = centerA.y - centerB.y;
+    // Compare squared distance to avoid expensive square root calculation
     float distanceSquared = (dx * dx) + (dy * dy);
     float radiusSum = radiusA + radiusB;
     return distanceSquared < (radiusSum * radiusSum);
 }
 
+// Entry point: initializes OpenGL window, shaders, buffers, and runs the main game loop
 int main() {
     if (!glfwInit()) return -1;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -170,6 +190,7 @@ int main() {
     CreateSquare();
     CreateCircle();
 
+    // Set up 2D orthographic camera matching the 800x600 window coordinates
     glm::mat4 Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, -1.0f, 1.0f);
     GLuint MatrixID = glGetUniformLocation(programID, "MVP");
     GLuint ColorID = glGetUniformLocation(programID, "objectColor");
@@ -180,6 +201,8 @@ int main() {
     StartLevel(currentLevel);
 
     while (!glfwWindowShouldClose(window)) {
+
+        // Calculate frame time delta so movement speed stays independent of FPS
         float currentTime = glfwGetTime();
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
@@ -188,11 +211,13 @@ int main() {
             timeElapsed += deltaTime;
             float speed = 350.0f * deltaTime;
 
+            // Count down invulnerability timer after taking damage
             if (invulnerabilityTimer > 0.0f) {
                 invulnerabilityTimer -= deltaTime;
                 if (invulnerabilityTimer < 0.0f) invulnerabilityTimer = 0.0f;
             }
 
+            // Test horizontal movement separately so player slides smoothly along walls
             glm::vec2 nextPosX = playerPos;
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) nextPosX.x -= speed;
             if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) nextPosX.x += speed;
@@ -211,6 +236,7 @@ int main() {
             }
             if (!collisionX) playerPos.x = nextPosX.x;
 
+            // Test vertical movement separately after horizontal position is resolved
             glm::vec2 nextPosY = playerPos;
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) nextPosY.y += speed;
             if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) nextPosY.y -= speed;
@@ -229,6 +255,7 @@ int main() {
             }
             if (!collisionY) playerPos.y = nextPosY.y;
 
+            // Advance to next level or trigger victory when reaching top exit
             if (playerPos.y > 580.0f) {
                 if (currentLevel < 2) {
                     currentLevel++;
@@ -241,6 +268,7 @@ int main() {
             }
         }
         else {
+            // Reset game state back to level 1 when R is pressed
             if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
                 currentLevel = 1;
                 playerHealth = maxHealth;
@@ -262,42 +290,31 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(programID);
 
+        // Render all solid wall blocks in the maze grid
         glBindVertexArray(squareVAO);
         glUniform3f(ColorID, 0.4f, 0.4f, 0.5f);
         for (int i = 0; i < 12; i++) {
             for (int j = 0; j < 16; j++) {
                 if (maze[i][j] == 1) {
+                    // Position and scale each unit square to match grid tile size
                     glm::mat4 Model = glm::translate(glm::mat4(1.0f), glm::vec3(j * blockSize, i * blockSize, 0.0f));
                     Model = glm::scale(Model, glm::vec3(blockSize, blockSize, 1.0f));
                     glm::mat4 MVP = Projection * Model;
+
                     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
                     glDrawArrays(GL_TRIANGLES, 0, 6);
                 }
             }
         }
 
-        if (!isGameOver) {
-            glBindVertexArray(squareVAO);
-            glUniform3f(ColorID, 0.0f, 1.0f, 0.5f);
-
-            glm::mat4 portalBase = glm::translate(glm::mat4(1.0f), glm::vec3(14 * blockSize + 25.0f, 11 * blockSize + 25.0f, 0.0f));
-            portalBase = glm::rotate(portalBase, timeElapsed * 120.0f, glm::vec3(0, 0, 1));
-
-            float pulseScale = 1.0f + 0.3f * sinf(timeElapsed * 4.0f);
-            portalBase = glm::scale(portalBase, glm::vec3(25.0f * pulseScale, 25.0f * pulseScale, 1.0f));
-            portalBase = glm::translate(portalBase, glm::vec3(-0.5f, -0.5f, 0.0f));
-
-            glm::mat4 portalMVP = Projection * portalBase;
-            glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &portalMVP[0][0]);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-        }
-
+        // Calculate oscillating wobble angle while player is moving
         float wobbleAngle = 0.0f;
         if (!isGameOver && (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS ||
             glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)) {
             wobbleAngle = sinf(timeElapsed * 20.0f) * 20.0f;
         }
 
+        // Toggle red warning color rapidly during invulnerability frames
         bool shouldFlash = (invulnerabilityTimer > 0.0f) && (fmod(invulnerabilityTimer * 10.0f, 2.0f) > 1.0f);
 
         glBindVertexArray(circleVAO);
@@ -308,6 +325,7 @@ int main() {
             glUniform3f(ColorID, 0.2f, 0.2f, 0.2f);
         }
 
+        // Build parent transform for player so ears inherit position and wobble
         glm::mat4 playerBase = glm::translate(glm::mat4(1.0f), glm::vec3(playerPos.x, playerPos.y, 0.0f));
         playerBase = glm::rotate(playerBase, wobbleAngle, glm::vec3(0, 0, 1));
 
@@ -325,7 +343,10 @@ int main() {
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &rightEarMVP[0][0]);
         glDrawArrays(GL_TRIANGLE_FAN, 0, circleVertexCount);
 
+        // Update and draw each patrolling spider
         for (size_t s = 0; s < spiders.size(); s++) {
+
+            // Interpolate spider position linearly between current and next patrol waypoints
             int numPoints = spiders[s].waypoints.size();
             float t = timeElapsed * spiders[s].speed;
 
@@ -338,6 +359,7 @@ int main() {
             glm::vec2 p2 = spiders[s].waypoints[nextIndex];
             glm::vec2 currentSpiderPos = p1 + fraction * (p2 - p1);
 
+            // Check enemy collision and apply damage if player is not invulnerable
             if (!isGameOver) {
                 if (CheckCircleCollision(playerPos, playerRadius, currentSpiderPos, spiderRadius)) {
                     if (invulnerabilityTimer <= 0.0f) {
@@ -352,6 +374,7 @@ int main() {
                 }
             }
 
+            // Draw spider body at interpolated waypoint position
             glBindVertexArray(circleVAO);
             glUniform3f(ColorID, 0.8f, 0.1f, 0.1f);
             glm::mat4 spiderBase = glm::translate(glm::mat4(1.0f), glm::vec3(currentSpiderPos.x, currentSpiderPos.y, 0.0f));
@@ -359,6 +382,7 @@ int main() {
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &spiderMVP[0][0]);
             glDrawArrays(GL_TRIANGLE_FAN, 0, circleVertexCount);
 
+            // Rotate core around its own center while following spiderBase
             glBindVertexArray(squareVAO);
             glUniform3f(ColorID, 1.0f, 0.8f, 0.0f);
 
@@ -369,29 +393,9 @@ int main() {
 
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &coreMVP[0][0]);
             glDrawArrays(GL_TRIANGLES, 0, 6);
-
-            glBindVertexArray(squareVAO);
-            glUniform3f(ColorID, 0.8f, 0.1f, 0.1f);
-
-            float legAngle = sinf(timeElapsed * 15.0f) * 35.0f;
-
-            for (int i = 0; i < 4; i++) {
-                glm::mat4 legR = glm::translate(spiderBase, glm::vec3(10.0f, 10.0f - (i * 6.0f), 0.0f));
-                legR = glm::rotate(legR, (i % 2 == 0) ? legAngle : -legAngle, glm::vec3(0, 0, 1));
-                legR = glm::translate(legR, glm::vec3(0.0f, -2.0f, 0.0f));
-                glm::mat4 legRMVP = Projection * glm::scale(legR, glm::vec3(25.0f, 4.0f, 1.0f));
-                glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &legRMVP[0][0]);
-                glDrawArrays(GL_TRIANGLES, 0, 6);
-
-                glm::mat4 legL = glm::translate(spiderBase, glm::vec3(-10.0f, 10.0f - (i * 6.0f), 0.0f));
-                legL = glm::rotate(legL, (i % 2 == 0) ? -legAngle : legAngle, glm::vec3(0, 0, 1));
-                legL = glm::translate(legL, glm::vec3(-25.0f, -2.0f, 0.0f));
-                glm::mat4 legLMVP = Projection * glm::scale(legL, glm::vec3(25.0f, 4.0f, 1.0f));
-                glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &legLMVP[0][0]);
-                glDrawArrays(GL_TRIANGLES, 0, 6);
-            }
         }
 
+        // Draw top-left health squares (red for active, gray for lost)
         glBindVertexArray(squareVAO);
         for (int h = 0; h < maxHealth; h++) {
             if (h < playerHealth) {
