@@ -1,6 +1,6 @@
 ![The Great Getaway Poster](pozajoc.png)
-# The Great Getaway: Mickey’s Syndicate - The Toontown Trap
-### A project made by Polojan Stefan-Alexandru, Borca Razvan-Andrei, Marin Ioana-Alexaia
+# The Great Getaway: Mickey’s Syndicate 
+### A project made by Polojan Stefan-Alexandru, Borca Razvan-Andrei, Marin Ioana-Alexia
 ## 📖 Story & Game Structure
 
 ### Act 1: The Setup
@@ -24,13 +24,13 @@ Mortimer enters the dark lower halls of the castle, using a flashlight attached 
 * **Task 4: The Broken Elevator.** Mortimer reaches the Grand Elevator leading to the upper keep. However, the elevator controls are completely sabotaged. With the doors jammed, Mortimer pries open a narrow access panel and crawls out of the elevator cab directly into the castle's shadowy ventilation system.
 
 ### Act 4: The Twist & The Final Boss
-
+* **Task 5**:
 Mortimer enters the lavish, gold-plated executive vault at the top of the tower. Mafia Mickey is there, quietly pouring tea. Sitting at the massive mahogany desk, stroking a white cat, is Minnie Mouse.
 
-* **The Plot Twist:** Minnie orchestrated the kidnapping herself as "The Godmother" of the Toontown Underworld. Finding Mortimer too boring for her criminal empire, she hired Mickey to lure him to the castle to eliminate him and collect his life insurance.
+ **The Plot Twist:** Minnie orchestrated the kidnapping herself as "The Godmother" of the Toontown Underworld. Finding Mortimer too boring for her criminal empire, she hired Mickey to lure him to the castle to eliminate him and collect his life insurance.
 
-* **The Boss Battle:** Minnie drops Mortimer into a lower arena with four fragile glass floor panels while operating a massive mechanical crane from a balcony above.
+ **The Boss Battle:** Minnie drops Mortimer into a lower arena with four fragile glass floor panels while operating a massive mechanical crane from a balcony above.
 
-* **The Puzzle & Solution:** Mortimer dodges as Minnie drops massive steel safes, positioning himself so the falling safes shatter all four glass floor panels.
+ **The Puzzle & Solution:** Mortimer dodges as Minnie drops massive steel safes, positioning himself so the falling safes shatter all four glass floor panels.
 
-* **The Ending:** The shattered panels cause the structural pillars to collapse, sending Minnie’s balcony crashing into the castle moat. Mortimer lights a cigar, walks out of the crumbling castle, and the credits roll.
+ **The Ending:** The shattered panels cause the structural pillars to collapse, sending Minnie’s balcony crashing into the castle moat. Mortimer lights a cigar, walks out of the crumbling castle, and the credits roll.
