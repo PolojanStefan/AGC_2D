@@ -1,6 +1,6 @@
 ![The Great Getaway Poster](pozajoc.png)
 # The Great Getaway: Mickey’s Syndicate - The Toontown Trap
-
+# A project made by Polojan Stefan-Alexandru, Borca Razvan-Andrei, Marin Iona-Alexaia
 ## 📖 Story & Game Structure
 
 ### Act 1: The Setup
@@ -23,7 +23,7 @@ Mortimer enters the dark lower halls of the castle, using a flashlight attached 
 
 * **Task 4: The Broken Elevator.** Mortimer reaches the Grand Elevator leading to the upper keep. However, the elevator controls are completely sabotaged. With the doors jammed, Mortimer pries open a narrow access panel and crawls out of the elevator cab directly into the castle's shadowy ventilation system.
 
-### Act 5: The Twist & The Final Boss
+### Act 4: The Twist & The Final Boss
 
 Mortimer enters the lavish, gold-plated executive vault at the top of the tower. Mafia Mickey is there, quietly pouring tea. Sitting at the massive mahogany desk, stroking a white cat, is Minnie Mouse.
 
